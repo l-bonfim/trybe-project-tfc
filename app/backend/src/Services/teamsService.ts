@@ -10,6 +10,21 @@ const getAllTeams = async (): Promise<IServiceResponse<ITeams[]>> => {
   };
 };
 
+const getTeamById = async (id: string): Promise<IServiceResponse<ITeams>> => {
+  const teamData = await TeamModel.findByPk(id);
+  if (!teamData) {
+    return {
+      status: 404,
+      data: { message: 'Team not found' },
+    };
+  }
+  return {
+    status: 200,
+    data: teamData?.dataValues,
+  };
+};
+
 export default {
   getAllTeams,
+  getTeamById,
 };
