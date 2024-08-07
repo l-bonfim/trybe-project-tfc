@@ -17,23 +17,17 @@ const validLogin = (password: string, userData: IUsers): IServiceResponse<IUsers
     };
   }
   return {
-    status: 404,
-    data: { message: 'User not found' },
+    status: 401,
+    data: { message: 'Invalid email or password' },
   };
 };
 
 const loginPost = async (email: string, password: string): Promise<IServiceResponse<IUsers>> => {
-  if (!email || !password) {
-    return {
-      status: 400,
-      data: { message: 'All fields must be filled' },
-    };
-  }
   const userData = await UserModel.findOne({ where: { email } });
   if (!userData) {
     return {
-      status: 404,
-      data: { message: 'User not found' },
+      status: 401,
+      data: { message: 'Invalid email or password' },
     };
   }
   const result = validLogin(password, userData.dataValues);
