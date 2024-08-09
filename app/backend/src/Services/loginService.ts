@@ -34,6 +34,28 @@ const loginPost = async (email: string, password: string): Promise<IServiceRespo
   return result;
 };
 
+const tokenVerify = (token: string): string => {
+  const decoded = jwt.verify(token, secret) as jwt.JwtPayload;
+  const { id } = decoded;
+  return id;
+};
+
+const loginRole = async (token: string): Promise<IServiceResponse<IUsers>> => {
+  const id = tokenVerify(token);
+  const userData = await UserModel.findByPk(id);
+  if (!userData) {
+    return {
+      status: 404,
+      data: { message: 'User not found' },
+    };
+  }
+  return {
+    status: 200,
+    data: { role: userData.dataValues.role },
+  };
+};
+
 export default {
   loginPost,
+  loginRole,
 };
