@@ -7,6 +7,13 @@ const getAllMatches = async (req: Request, res: Response) => {
   return res.status(matchesData.status).json(matchesData.data);
 };
 
+const matchFinisher = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const dataRes = await matchesService.matchFinisher(id);
+  return res.status(dataRes.status).json(dataRes.data);
+};
+
 export default {
   getAllMatches,
+  matchFinisher,
 };

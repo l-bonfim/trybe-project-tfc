@@ -35,6 +35,15 @@ const getAllMatches = async (matchStatus: unknown): Promise<IServiceResponse<IMa
   return getFilteredMatches(matchStatus);
 };
 
+const matchFinisher = async (id: string): Promise<IServiceResponse<IMatches[]>> => {
+  await MatchModel.update({ inProgress: false }, { where: { id } });
+  return {
+    status: 200,
+    data: { message: 'Finished' },
+  };
+};
+
 export default {
   getAllMatches,
+  matchFinisher,
 };
