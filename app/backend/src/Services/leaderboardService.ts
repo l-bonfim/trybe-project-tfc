@@ -1,49 +1,11 @@
-/* eslint-disable no-param-reassign */
 import TeamModel from '../database/models/TeamModel';
 import MatchModel from '../database/models/MatchModel';
 import ILeaderboard from '../Interfaces/Leaderboard';
+import IMatches from '../Interfaces/Matches';
 
 const getAllTeams = async () => {
   const teamsData = await TeamModel.findAll();
   return teamsData.map((team) => team.dataValues);
-};
-
-const matchHomeStat = async (
-  homeTeamGoals: number,
-  awayTeamGoals: number,
-  winStat: { victory: number; loss: number; draw: number;
-    goalsFavor: number; goalOwn: number; points: number; },
-): Promise<void> => {
-  winStat.goalsFavor += homeTeamGoals;
-  winStat.goalOwn += awayTeamGoals;
-  if (homeTeamGoals > awayTeamGoals) {
-    winStat.victory += 1;
-    winStat.points += 3;
-  }
-  if (homeTeamGoals < awayTeamGoals) winStat.loss += 1;
-  if (homeTeamGoals === awayTeamGoals) {
-    winStat.draw += 1;
-    winStat.points += 1;
-  }
-};
-
-const matchAwayStat = async (
-  homeTeamGoals: number,
-  awayTeamGoals: number,
-  winStat: { victory: number; loss: number; draw: number;
-    goalsFavor: number; goalOwn: number; points: number; },
-): Promise<void> => {
-  winStat.goalsFavor += awayTeamGoals;
-  winStat.goalOwn += homeTeamGoals;
-  if (homeTeamGoals < awayTeamGoals) {
-    winStat.victory += 1;
-    winStat.points += 3;
-  }
-  if (homeTeamGoals > awayTeamGoals) winStat.loss += 1;
-  if (homeTeamGoals === awayTeamGoals) {
-    winStat.draw += 1;
-    winStat.points += 1;
-  }
 };
 
 const dataRes = (
@@ -65,6 +27,46 @@ const dataRes = (
   efficiency: parseFloat(winStat.efficiency.toFixed(2)),
 });
 
+const getHomeStats = (winStat: { victory: number; loss: number; draw: number;
+  goalsFavor: number; goalOwn: number; points: number;
+  goalBalance:number; efficiency: number }, matchInfo: IMatches[]) => {
+  const auxStat = winStat;
+  matchInfo.forEach((match) => {
+    auxStat.goalsFavor += match.homeTeamGoals;
+    auxStat.goalOwn += match.awayTeamGoals;
+    if (match.homeTeamGoals > match.awayTeamGoals) {
+      auxStat.victory += 1;
+      auxStat.points += 3;
+    } else if (match.homeTeamGoals < match.awayTeamGoals) {
+      auxStat.loss += 1;
+    } else {
+      auxStat.draw += 1;
+      auxStat.points += 1;
+    }
+  });
+  return auxStat;
+};
+
+const getAwayStats = (winStat: { victory: number; loss: number; draw: number;
+  goalsFavor: number; goalOwn: number; points: number;
+  goalBalance:number; efficiency: number }, matchInfo: IMatches[]) => {
+  const auxStat = winStat;
+  matchInfo.forEach((match) => {
+    auxStat.goalsFavor += match.awayTeamGoals;
+    auxStat.goalOwn += match.homeTeamGoals;
+    if (match.homeTeamGoals < match.awayTeamGoals) {
+      auxStat.victory += 1;
+      auxStat.points += 3;
+    } else if (match.homeTeamGoals > match.awayTeamGoals) {
+      auxStat.loss += 1;
+    } else {
+      auxStat.draw += 1;
+      auxStat.points += 1;
+    }
+  });
+  return auxStat;
+};
+
 const getHomeMatches = async (id: number, teamName: string) => {
   const homeMatchesData = await MatchModel.findAndCountAll(
     { where: { homeTeamId: id, inProgress: false } },
@@ -80,10 +82,10 @@ const getHomeMatches = async (id: number, teamName: string) => {
   };
   const { count, rows } = homeMatchesData;
   const matchInfo = rows.map((match) => match.dataValues);
-  matchInfo.map((match) => matchHomeStat(match.homeTeamGoals, match.awayTeamGoals, winStat));
-  winStat.goalBalance = winStat.goalsFavor - winStat.goalOwn;
-  winStat.efficiency = (winStat.points / (count * 3)) * 100;
-  return dataRes(teamName, winStat, count);
+  const winStatF = getHomeStats(winStat, matchInfo);
+  winStatF.goalBalance = winStat.goalsFavor - winStat.goalOwn;
+  winStatF.efficiency = (winStat.points / (count * 3)) * 100;
+  return dataRes(teamName, winStatF, count);
 };
 
 const getAwayMatches = async (id: number, teamName: string) => {
@@ -101,10 +103,10 @@ const getAwayMatches = async (id: number, teamName: string) => {
   };
   const { count, rows } = awayMatchesData;
   const matchInfo = rows.map((match) => match.dataValues);
-  matchInfo.map((match) => matchAwayStat(match.homeTeamGoals, match.awayTeamGoals, winStat));
-  winStat.goalBalance = winStat.goalsFavor - winStat.goalOwn;
-  winStat.efficiency = (winStat.points / (count * 3)) * 100;
-  return dataRes(teamName, winStat, count);
+  const winStatF = getAwayStats(winStat, matchInfo);
+  winStatF.goalBalance = winStat.goalsFavor - winStat.goalOwn;
+  winStatF.efficiency = (winStat.points / (count * 3)) * 100;
+  return dataRes(teamName, winStatF, count);
 };
 
 const getHomeInfos = async () => {
