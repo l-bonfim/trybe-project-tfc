@@ -4,6 +4,7 @@ import 'express-async-errors';
 import errorMiddleware from './middlewares/errorMiddleware';
 import teamsRouter from './Routes/teamsRouter';
 import loginRouter from './Routes/loginRouter';
+import matchesRouter from './Routes/matchesRouter';
 
 class App {
   public app: express.Express;
@@ -18,6 +19,7 @@ class App {
 
     this.app.use('/teams', teamsRouter);
     this.app.use('/login', loginRouter);
+    this.app.use('/matches', matchesRouter);
 
     // Não remova esse middleware de erro, mas fique a vontade para customizá-lo
     // Mantenha ele sempre como o último middleware a ser chamado
