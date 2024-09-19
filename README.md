@@ -4,6 +4,7 @@ informaçoes adicionais do projeto foram removidas desse README para ter apenas 
 
 <details>
   <summary>Informações Removidas</summary>
+  
   [INFO](./project-info.md)
 </details>
 
