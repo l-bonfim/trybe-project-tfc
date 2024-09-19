@@ -4,7 +4,7 @@ informaçoes adicionais do projeto foram removidas desse README para ter apenas 
 
 <details>
   <summary>Informações Removidas</summary>
-  (./project-info.md)
+  [INFO](./project-info.md)
 </details>
 
 # Boas vindas ao repositório do Trybe Futebol Clube!
